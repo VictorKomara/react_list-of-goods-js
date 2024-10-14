@@ -2,6 +2,7 @@ import 'bulma/css/bulma.css';
 import cn from 'classnames/bind';
 import { useState } from 'react';
 import './App.scss';
+import { GoodsList } from './components/GoodsList/GoodsList';
 
 export const goodsFromServer = [
   { id: 1, name: 'Dumplings' },
@@ -19,22 +20,28 @@ export const goodsFromServer = [
 const SORT_BY_ABC = 'abc';
 const SORT_BY_LENGTH = 'length';
 
-export const App = () => {
-  const [sortField, setSortField] = useState('');
-  const [reversed, setReversed] = useState(false);
-  let visibleGoods = [...goodsFromServer];
+function getReorderedGoods(goods, sortType, isReversed) {
+  const visibleGoods = [...goods];
 
-  if (sortField === SORT_BY_ABC) {
-    visibleGoods.sort((good1, good2) => good1.name.localeCompare(good2.name));
-  }
-
-  if (sortField === SORT_BY_LENGTH) {
+  if (sortType === SORT_BY_LENGTH) {
     visibleGoods.sort((good1, good2) => good1.name.length - good2.name.length);
   }
 
-  if (reversed) {
-    visibleGoods = visibleGoods.toReversed();
+  if (sortType === SORT_BY_ABC) {
+    visibleGoods.sort((good1, good2) => good1.name.localeCompare(good2.name));
   }
+
+  if (isReversed) {
+    visibleGoods.reverse();
+  }
+
+  return visibleGoods;
+}
+
+export const App = () => {
+  const [sortField, setSortField] = useState('');
+  const [reversed, setReversed] = useState(false);
+  const visibleGoods = getReorderedGoods(goodsFromServer, sortField, reversed);
 
   return (
     <div className="section content">
@@ -83,13 +90,7 @@ export const App = () => {
         ) : null}
       </div>
 
-      <ul>
-        {visibleGoods.map(good => (
-          <li data-cy="Good" key={good.id}>
-            {good.name}
-          </li>
-        ))}
-      </ul>
+      <GoodsList goods={visibleGoods} />
     </div>
   );
 };
